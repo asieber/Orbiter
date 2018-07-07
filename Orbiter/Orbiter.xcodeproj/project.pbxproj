@@ -15,6 +15,8 @@
 		3C3C778020F1753D0005A56A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C3C777E20F1753D0005A56A /* Main.storyboard */; };
 		3C3C778220F1753E0005A56A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C3C778120F1753E0005A56A /* Assets.xcassets */; };
 		3C3C778520F1753E0005A56A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C3C778320F1753E0005A56A /* LaunchScreen.storyboard */; };
+		3C3C778E20F176590005A56A /* Ship.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3C778D20F176590005A56A /* Ship.swift */; };
+		3C3C779020F176710005A56A /* SlingShot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3C778F20F176710005A56A /* SlingShot.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		3C3C778120F1753E0005A56A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3C3C778420F1753E0005A56A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3C3C778620F1753E0005A56A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3C3C778D20F176590005A56A /* Ship.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ship.swift; sourceTree = "<group>"; };
+		3C3C778F20F176710005A56A /* SlingShot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlingShot.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +64,7 @@
 		3C3C777320F1753D0005A56A /* Orbiter */ = {
 			isa = PBXGroup;
 			children = (
+				3C3C778C20F1764E0005A56A /* model */,
 				3C3C777420F1753D0005A56A /* AppDelegate.swift */,
 				3C3C777620F1753D0005A56A /* GameScene.sks */,
 				3C3C777820F1753D0005A56A /* Actions.sks */,
@@ -71,6 +76,15 @@
 				3C3C778620F1753E0005A56A /* Info.plist */,
 			);
 			path = Orbiter;
+			sourceTree = "<group>";
+		};
+		3C3C778C20F1764E0005A56A /* model */ = {
+			isa = PBXGroup;
+			children = (
+				3C3C778D20F176590005A56A /* Ship.swift */,
+				3C3C778F20F176710005A56A /* SlingShot.swift */,
+			);
+			path = model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,6 +161,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C3C777B20F1753D0005A56A /* GameScene.swift in Sources */,
+				3C3C778E20F176590005A56A /* Ship.swift in Sources */,
+				3C3C779020F176710005A56A /* SlingShot.swift in Sources */,
 				3C3C777D20F1753D0005A56A /* GameViewController.swift in Sources */,
 				3C3C777520F1753D0005A56A /* AppDelegate.swift in Sources */,
 			);
