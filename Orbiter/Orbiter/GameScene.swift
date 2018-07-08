@@ -16,6 +16,7 @@ class GameScene: SKScene {
     
     private var ship : Ship?
     private var slingShot : SlingShot?
+    private var slinging : Bool?
     
     private var previousTime : TimeInterval?
     
@@ -45,6 +46,7 @@ class GameScene: SKScene {
         
         self.ship = Ship(size: screenSize)
         self.slingShot = SlingShot()
+        self.slinging = false
         
         self.addChild(self.ship!)
         
@@ -62,6 +64,9 @@ class GameScene: SKScene {
         //        }
         
         self.ship?.position = pos
+        self.ship?.velocity.dx = 0
+        self.ship?.velocity.dy = 0
+        self.slinging = false
         self.slingShot = SlingShot()
         self.slingShot?.attachToInitPos(initPos: pos)
         self.addChild(self.slingShot!)
@@ -85,7 +90,17 @@ class GameScene: SKScene {
         //            self.addChild(n)
         //        }
         
-        self.slingShot?.removeFromParent() //self.slingshot still has persistent data after this?
+        if(self.slingShot?.radius.isLess(than: CGFloat(100)))! {
+            self.slinging = false
+        } else {
+            self.slinging = true
+        }
+        
+        if(!self.slinging!) {
+            self.slingShot?.removeFromParent() //self.slingshot still has persistent data after this?
+        }
+        
+        //print(self.slingShot?.radius, self.slingShot?.theta)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -116,14 +131,37 @@ class GameScene: SKScene {
             print("INITIALIZING PREVIOUS TIME")
             return
         }
-        
-        let vx = self.ship?.velocity.dx
-        let vy = self.ship?.velocity.dy
-        
         let dt = CGFloat(currentTime - self.previousTime!)
         
-        self.ship?.position.x += vx! * dt
-        self.ship?.position.y += vy! * dt
+//        if(self.slingShot?.radius.isLess(than: 0))! {
+//            self.slinging = false
+//        }
+        
+        if(self.slinging!) {
+            self.slingShot?.slingShip(ship: self.ship!, forTime: dt)
+            self.slingShot?.stretchFromInitPosToShip(ship: self.ship!)
+        } else {
+            //self.slingShot?.removeFromParent()
+        }
+        
+//        if(self.slinging!) {
+//
+//            self.slingShot?.slingShip(ship: self.ship!, forTime: dt)
+//
+//        } else {
+//
+//            let vx = self.ship?.velocity.dx
+//            let vy = self.ship?.velocity.dy
+//
+//            self.ship?.position.x += vx! * dt
+//            self.ship?.position.y += vy! * dt
+//        }
+        
+//        let vx = self.ship?.velocity.dx
+//        let vy = self.ship?.velocity.dy
+//
+//        self.ship?.position.x += vx! * dt
+//        self.ship?.position.y += vy! * dt
         
         self.previousTime = currentTime
         
