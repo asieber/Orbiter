@@ -11,103 +11,58 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    //    private var label : SKLabelNode?
-    //    private var spinnyNode : SKShapeNode?
-    
     private var ship : Ship?
     private var slingShot : SlingShot?
-    private var slinging : Bool?
-    
+    //previousTime used for calculating change in time (dt) between each frame (usually ~1/60 seconds)
     private var previousTime : TimeInterval?
     
     override func didMove(to view: SKView) {
-        
-        // Get label node from scene and store it for use later
-        //        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        //        if let label = self.label {
-        //            label.alpha = 0.0
-        //            label.run(SKAction.fadeIn(withDuration: 2.0))
-        //        }
-        
-        // Create shape node to use during mouse interaction
-        //        let w = (self.size.width + self.size.height) * 0.05
-        //        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        //
-        //        if let spinnyNode = self.spinnyNode {
-        //            spinnyNode.lineWidth = 2.5
-        //
-        //            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-        //            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-        //                                              SKAction.fadeOut(withDuration: 0.5),
-        //                                              SKAction.removeFromParent()]))
-        //        }
-        
+        //initialize instance variables when sthe controller switches to this view
         let screenSize = (self.size.width + self.size.height) * 0.05
-        
         self.ship = Ship(size: screenSize)
         self.slingShot = SlingShot()
-        self.slinging = false
-        
         self.addChild(self.ship!)
-        
         self.previousTime = -1
-        
         print("STARTING APP")
     }
     
-    
+    //when you place your finger on the screen
     func touchDown(atPoint pos : CGPoint) {
-        //        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-        //            n.position = pos
-        //            n.strokeColor = SKColor.green
-        //            self.addChild(n)
-        //        }
-        
+        //place the ship at the position
         self.ship?.position = pos
         self.ship?.velocity.dx = 0
         self.ship?.velocity.dy = 0
-        self.slinging = false
+        //anchor the slingshot to the point you touched
         self.slingShot = SlingShot()
         self.slingShot?.attachToInitPos(initPos: pos)
+        //add the slingshot to the scene
         self.addChild(self.slingShot!)
     }
     
+    //when you touch a point on the screen
     func touchMoved(toPoint pos : CGPoint) {
-        //        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-        //            n.position = pos
-        //            n.strokeColor = SKColor.blue
-        //            self.addChild(n)
-        //        }
-        
+        //update the ship's position
         self.ship?.position = pos
+        //redraw the slingshot
         self.slingShot?.stretchFromInitPosToShip(ship: self.ship!)
     }
     
+    //when you lift your finger off the screen
     func touchUp(atPoint pos : CGPoint) {
-        //        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-        //            n.position = pos
-        //            n.strokeColor = SKColor.red
-        //            self.addChild(n)
-        //        }
-        
+        //don't sling the ship unless you drag it greater than 100 pixels from its initial position
         if(self.slingShot?.radius.isLess(than: CGFloat(100)))! {
-            self.slinging = false
+            self.slingShot?.isSlinging = false
         } else {
-            self.slinging = true
+            self.slingShot?.isSlinging = true
         }
-        
-        if(!self.slinging!) {
-            self.slingShot?.removeFromParent() //self.slingshot still has persistent data after this?
+        //get rid of the slingshot from the scene if it isn't currently slinging
+        if(!(self.slingShot?.isSlinging)!) {
+            self.slingShot?.removeFromParent()
         }
-        
-        //print(self.slingShot?.radius, self.slingShot?.theta)
     }
     
+    //the below 4 methods were not added by Alex
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //        if let label = self.label {
-        //            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        //        }
-        
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
@@ -123,9 +78,9 @@ class GameScene: SKScene {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
+    //update the model data and redraw the scene at the beginning of each new frame (every 1/60 of a second)
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        
+        //use previous time for calculating change in time (dt) between each frame (usually ~1/60 seconds)
         if(previousTime == -1) {
             self.previousTime = currentTime
             print("INITIALIZING PREVIOUS TIME")
@@ -133,65 +88,18 @@ class GameScene: SKScene {
         }
         let dt = CGFloat(currentTime - self.previousTime!)
         
-//        if(self.slingShot?.radius.isLess(than: 0))! {
-//            self.slinging = false
-//        }
-        
-        if(self.slinging!) {
-            self.slingShot?.slingShip(ship: self.ship!, forTime: dt)
-            self.slingShot?.stretchFromInitPosToShip(ship: self.ship!)
-        } else {
-            //self.slingShot?.removeFromParent()
+        if(self.slingShot?.isSlinging)! { //animate the ship when it's slinging (accelerating)
+            
+            self.slingShot?.slingShip(ship: self.ship!, forTime: dt) //this method changes the ships position accordingly
+            
+        } else { //animate the ship when it's not slinging (constant velocity)
+            
+            let vx = self.ship?.velocity.dx //straightforward kinematic equations
+            let vy = self.ship?.velocity.dy
+            
+            self.ship?.position.x -= vx! * dt
+            self.ship?.position.y -= vy! * dt
         }
-        
-//        if(self.slinging!) {
-//
-//            self.slingShot?.slingShip(ship: self.ship!, forTime: dt)
-//
-//        } else {
-//
-//            let vx = self.ship?.velocity.dx
-//            let vy = self.ship?.velocity.dy
-//
-//            self.ship?.position.x += vx! * dt
-//            self.ship?.position.y += vy! * dt
-//        }
-        
-//        let vx = self.ship?.velocity.dx
-//        let vy = self.ship?.velocity.dy
-//
-//        self.ship?.position.x += vx! * dt
-//        self.ship?.position.y += vy! * dt
-        
         self.previousTime = currentTime
-        
-        //print(self.ship?.position)
-        //print(dt)
-        
-        //        //ideally want something like this:
-        //        if(self.slingShot != nil && self.slingShot.isAttchedToShip) {
-        //
-        //            let vx = self.ship?.velocity.dx
-        //            let vy = self.ship?.velocity.dy
-        //
-        //            let dt = CGFloat(currentTime - self.previousTime!)
-        //
-        //            self.ship?.position.x += vx! * dt
-        //            self.ship?.position.y += vy! * dt
-        //
-        //            let x = self.slingShot?.length
-        //            let k = self.slingShot?.k
-        //            let f = -k * x
-        //            let a = f / self.ship?.mass
-        //
-        //            let ax = a * cos(self.slingShot.theta)
-        //            let ay = a * sin(self.slingShot.theta)
-        //
-        //            let dvx = ax * dt
-        //            let dvy = ay * dt
-        //
-        //            self.ship?.velocity.dx += dvx
-        //            self.ship?.velocity.dy += dvy
-        //        }
     }
 }
