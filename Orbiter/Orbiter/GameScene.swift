@@ -47,7 +47,7 @@ class GameScene: SKScene {
         self.addChild(self.slingShot!)
     }
     
-    //when you touch a point on the screen
+    //when you drag you finger across the screen
     func touchMoved(toPoint pos : CGPoint) {
         //update the ship's position
         self.ship?.position = pos
