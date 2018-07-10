@@ -13,13 +13,15 @@ class GameScene: SKScene {
     
     private var ship : Ship?
     private var slingShot : SlingShot?
+    //screenSize is a constant representing the size of the screen
+    private var screenSize : CGFloat?
     //previousTime used for calculating change in time (dt) between each frame (usually ~1/60 seconds)
     private var previousTime : TimeInterval?
     
     override func didMove(to view: SKView) {
         //initialize instance variables when sthe controller switches to this view
-        let screenSize = (self.size.width + self.size.height) * 0.05
-        self.ship = Ship(size: screenSize)
+        self.screenSize = (self.size.width + self.size.height) * 0.05
+        self.ship = Ship(size: self.screenSize!)
         self.slingShot = SlingShot()
         self.addChild(self.ship!)
         self.previousTime = -1
@@ -28,10 +30,16 @@ class GameScene: SKScene {
     
     //when you place your finger on the screen
     func touchDown(atPoint pos : CGPoint) {
+        
         //place the ship at the position
         self.ship?.position = pos
         self.ship?.velocity.dx = 0
         self.ship?.velocity.dy = 0
+        
+        //if the slingshot is still slinging when you reposition the ship, get rid of the slingshot first
+        if(self.slingShot?.isSlinging)! {
+            self.slingShot?.removeFromParent()
+        }
         //anchor the slingshot to the point you touched
         self.slingShot = SlingShot()
         self.slingShot?.attachToInitPos(initPos: pos)
@@ -49,9 +57,9 @@ class GameScene: SKScene {
     
     //when you lift your finger off the screen
     func touchUp(atPoint pos : CGPoint) {
-        //don't sling the ship unless you drag it greater than 100 pixels from its initial position
-        if(self.slingShot?.radius.isLess(than: CGFloat(100)))! {
-            self.slingShot?.isSlinging = false
+        //don't sling the ship unless you drag it greater than X pixels from its initial position: TODO: PUT IN MODEL
+        if(self.slingShot?.radius.isLess(than: self.screenSize! / 10))! {
+            //self.slingShot?.isSlinging = false
         } else {
             self.slingShot?.isSlinging = true
         }
@@ -80,26 +88,47 @@ class GameScene: SKScene {
     
     //update the model data and redraw the scene at the beginning of each new frame (every 1/60 of a second)
     override func update(_ currentTime: TimeInterval) {
-        //use previous time for calculating change in time (dt) between each frame (usually ~1/60 seconds)
+        
         if(previousTime == -1) {
             self.previousTime = currentTime
             print("INITIALIZING PREVIOUS TIME")
             return
         }
+        //use previous time for calculating change in time (dt) between each frame (usually ~1/60 seconds)
         let dt = CGFloat(currentTime - self.previousTime!)
         
-        if(self.slingShot?.isSlinging)! { //animate the ship when it's slinging (accelerating)
-            
-            self.slingShot?.slingShip(ship: self.ship!, forTime: dt) //this method changes the ships position accordingly
+        //animate the ship when it's slinging (accelerating)
+        if(self.slingShot?.isSlinging)! {
+            //change the ship's position & velocity accordingly
+            self.slingShot?.slingShip(ship: self.ship!, forTime: dt)
             
         } else { //animate the ship when it's not slinging (constant velocity)
             
-            let vx = self.ship?.velocity.dx //straightforward kinematic equations
+            //below varibales only used for checking whether or not the slingshot is done slinging
+            let vx = self.ship?.velocity.dx
             let vy = self.ship?.velocity.dy
+            let v = sqrt(vx! * vx! + vy! * vy!)
             
-            self.ship?.position.x -= vx! * dt
-            self.ship?.position.y -= vy! * dt
+            //if the slingshot is done slinging and the ship is flying away
+            if(!(self.slingShot?.isSlinging)! && v > 0) {
+                //remove the slingshot node from the scene
+                self.slingShot?.removeFromParent()
+            }
+            
+//            //this is ideally how the planets would alter the ship's velocity (not position) accordingly
+//            for(planet in planets) {
+//                planet.gravitateShip(ship: self.ship!, forTime: dt)
+//            }
+            
+            //NOTE #1: it should be the ship's responsibility to travel (change its position based on its velocity) for a given amount of time since it knows its position & velocity at any given instance (frame)
+            //NOTE #2: we don't want the ship affected by gravity while we are slinging
+            //NOTE #3: gravity shouldn't edit the ships position, that is the ship's job. It should only alter the velocity. That way, the ship discretely travels linearly between each frame; Gravity doesn't NEED to change the ship's position -- that's the way the code is structured at the moment
+            
+            
         }
+        //change the ship's position accordingly based on its current velocity
+        self.ship?.travel(forTime: dt)
+        
         self.previousTime = currentTime
     }
 }
